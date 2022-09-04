@@ -1,0 +1,2 @@
+If you need to read only specific number of characters, say N number of characters, present at the starting of the file, pass N (number) as argument to read() function.
+
