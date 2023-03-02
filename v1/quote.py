@@ -8,10 +8,10 @@ x1 = 612
 y1 = 612
 
 #my quote
-#sentence = "குட்டித்தளம்‌ ஒன்று ௯பூஜில்லாவுக்கு அனுப்பப்பட்டது. அதன்‌ உத்யோகம்‌ ஓடிப்போன முஸல்மான்‌ குடியானவர்‌ களை ஊருக்குத்‌ திரும்பிவந்து வீடும்‌ குடித்தனமுமாகக்‌ குடியிருந்து"
+#sentence = "text here"
 
 #choose a font
-fnt = ImageFont.truetype('./fonts/MeeraInimai.ttf', 30)
+fnt = ImageFont.truetype('./fonts/Pavanam.ttf', 30)
 
 img = Image.new('RGB', (x1, y1), color = (132, 255, 202))
 d = ImageDraw.Draw(img)
