@@ -1,0 +1,106 @@
+import textwrap
+import random
+import time
+from PIL import Image, ImageDraw, ImageFont
+
+# Fonts configuration
+TEXT_FONTS = {
+    'en': ['Inter.ttf', 'Inter.ttf'],
+    'ta': ['Notoserif.ttf', 'Notoserif.ttf']
+}
+NAME_FONTS = {
+    'en': ['Inria.ttf', 'Inria.ttf'],
+    'ta': ['Tiro.ttf', 'Tiro.ttf']
+}
+
+# Image config
+WIDTH, HEIGHT = 1080, 1920  # WhatsApp Status size
+MARGIN = 100  # Padding around text
+GAP = 50  # Gap between body text and author name
+
+def random_gradient():
+    color1 = tuple(random.randint(64, 192) for _ in range(3))
+    color2 = tuple(random.randint(64, 192) for _ in range(3))
+    base = Image.new('RGB', (WIDTH, HEIGHT), color1)
+    top = Image.new('RGB', (WIDTH, HEIGHT), color2)
+    mask = Image.linear_gradient('L').resize((WIDTH, HEIGHT))
+    return Image.composite(top, base, mask)
+
+def wrap_text(draw, text, font, max_width):
+    lines = []
+    for line in text.split('\n'):
+        if line.strip() == '':
+            lines.append('')
+            continue
+        wrapped = textwrap.fill(line, width=40)  # fallback wrap
+        words = line.split()
+        current = ''
+        for word in words:
+            test = f'{current} {word}'.strip()
+            w, _ = draw.textbbox((0, 0), test, font=font)[2:]
+            if w <= max_width:
+                current = test
+            else:
+                lines.append(current)
+                current = word
+        if current:
+            lines.append(current)
+    return lines
+
+def draw_multiline_centered(draw, lines, font, start_y, fill):
+    for line in lines:
+        w, h = draw.textbbox((0, 0), line, font=font)[2:]
+        x = (WIDTH - w) / 2
+        draw.text((x, start_y), line, font=font, fill=fill)
+        start_y += h
+    return start_y
+
+def detect_language(text):
+    for ch in text:
+        if '\u0B80' <= ch <= '\u0BFF':  # Tamil Unicode Block
+            return 'ta'
+    return 'en'
+
+def main():
+    with open('input.txt', 'r') as f:
+        content = f.read().strip()
+
+    if '\n\n' in content:
+        body, author = content.split('\n\n', 1)
+    else:
+        body, author = content, ''
+
+    lang = detect_language(content)
+
+    body_font = ImageFont.truetype(TEXT_FONTS[lang][0], 80)
+    name_font = ImageFont.truetype(NAME_FONTS[lang][0], 50)
+
+    img = random_gradient()
+    draw = ImageDraw.Draw(img)
+
+    body_lines = wrap_text(draw, body, body_font, WIDTH - 2 * MARGIN)
+    author_lines = wrap_text(draw, author, name_font, WIDTH - 2 * MARGIN)
+
+    # Calculate total height
+    total_height = sum(draw.textbbox((0, 0), line, font=body_font)[3] for line in body_lines)
+    total_height += GAP
+    total_height += sum(draw.textbbox((0, 0), line, font=name_font)[3] for line in author_lines)
+
+    start_y = (HEIGHT - total_height) / 2
+
+    # Draw body
+    current_y = draw_multiline_centered(draw, body_lines, body_font, start_y, fill='white')
+
+    # Add gap
+    current_y += GAP
+
+    # Draw author
+    draw_multiline_centered(draw, author_lines, name_font, current_y, fill='white')
+
+    filename = f'{int(time.time())}.jpg'
+    img.save(filename, 'JPEG')
+    print(f'Saved as {filename}')
+
+if __name__ == '__main__':
+    main()
+
