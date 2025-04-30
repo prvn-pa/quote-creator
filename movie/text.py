@@ -75,7 +75,7 @@ def generate_poster(movie, poster_img):
     poster = Image.new("RGB", (width, height), color="#e4e0d8")
 
     # Resize and paste poster image
-    poster_img = poster_img.resize((width, int(height * 0.7)))
+    poster_img = poster_img.resize((width, int(height * 0.725)))
     poster.paste(poster_img, (0, 0))
 
     draw = ImageDraw.Draw(poster)
@@ -84,7 +84,7 @@ def generate_poster(movie, poster_img):
     sub_font = ImageFont.truetype(TEXT_FONT, 20)
     small_font = ImageFont.truetype(TEXT_FONT, 18)
 
-    y = int(height * 0.7) + 20
+    y = int(height * 0.725) + 20
     draw.text((20, y), f"{movie['title'].upper()}", font=title_font, fill="black")
     y += 40
     draw.text((20, y), f"{movie.get('year', '')}", font=sub_font, fill="black")
@@ -96,10 +96,6 @@ def generate_poster(movie, poster_img):
 
     if 'director' in movie:
         draw.text((20, y), f"directed by:  {format_list(movie['director'])}", font=small_font, fill="black")
-        y += 30
-
-    if 'producer' in movie:
-        draw.text((20, y), f"produced by:  {format_list(movie['producer'])}", font=small_font, fill="black")
         y += 30
 
     if 'cast' in movie:

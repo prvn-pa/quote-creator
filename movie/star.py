@@ -58,19 +58,33 @@ def get_star_icons(rating, assets_path="assets"):
 
     return [Image.open(os.path.join(assets_path, icon)).convert("RGBA") for icon in icons]
 
-def draw_rating(poster_img, rating, assets_path="assets", spacing=10, y_offset=30):
+def draw_rating(poster_img, rating, assets_path="assets", spacing=10, y_offset=30, label_font_path=TEXT_FONT):
     """
     Draws star icons at the bottom center of the poster image.
     """
     stars = get_star_icons(rating, assets_path)
     if not stars:
         return
+        
+    draw = ImageDraw.Draw(poster_img)
+    label_font = ImageFont.truetype(label_font_path, 16)
 
     star_width, star_height = stars[0].size
     total_width = len(stars) * star_width + (len(stars) - 1) * spacing
 
+        # Text position
+    label_text = "My Rating:"
+    label_bbox = draw.textbbox((0, 0), label_text, font=label_font)
+    label_width = label_bbox[2] - label_bbox[0]
+    label_height = label_bbox[3] - label_bbox[1]
+    label_x = (poster_img.width - label_width) // 2
+    label_y = poster_img.height - star_height - y_offset - label_height - 10
+
+    draw.text((label_x, label_y), label_text, font=label_font, fill="black")
+
+    # Stars below the text
     x_start = (poster_img.width - total_width) // 2
-    y_start = poster_img.height - star_height - y_offset
+    y_start = label_y + label_height + 15  # a little gap between text and stars
 
     for i, star in enumerate(stars):
         x = x_start + i * (star_width + spacing)
@@ -82,7 +96,7 @@ def generate_poster(movie, poster_img):
     poster = Image.new("RGB", (width, height), color="#e4e0d8")
 
     # Resize and paste poster image
-    poster_img = poster_img.resize((width, int(height * 0.7)))
+    poster_img = poster_img.resize((width, int(height * 0.715)))
     poster.paste(poster_img, (0, 0))
 
     draw = ImageDraw.Draw(poster)
@@ -91,7 +105,7 @@ def generate_poster(movie, poster_img):
     sub_font = ImageFont.truetype(TEXT_FONT, 20)
     small_font = ImageFont.truetype(TEXT_FONT, 18)
 
-    y = int(height * 0.7) + 20
+    y = int(height * 0.715) + 20
     draw.text((20, y), f"{movie['title'].upper()}", font=title_font, fill="black")
     y += 40
     draw.text((20, y), f"{movie.get('year', '')}", font=sub_font, fill="black")
@@ -103,10 +117,6 @@ def generate_poster(movie, poster_img):
 
     if 'director' in movie:
         draw.text((20, y), f"directed by:  {format_list(movie['director'])}", font=small_font, fill="black")
-        y += 30
-
-    if 'producer' in movie:
-        draw.text((20, y), f"produced by:  {format_list(movie['producer'])}", font=small_font, fill="black")
         y += 30
 
     if 'cast' in movie:
