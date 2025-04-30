@@ -81,7 +81,7 @@ def draw_rating(poster_img, rating, assets_path="assets", spacing=10, y_offset=3
 
 def generate_book_poster(book, cover_img):
     poster_width, poster_height = 640, 960
-    poster = Image.new("RGB", (poster_width, poster_height), color="#cf857c")
+    poster = Image.new("RGB", (poster_width, poster_height), color="#e4e0d8")
 
     # Step 1: Resize cover image to width = 400 while maintaining aspect ratio
     desired_width = 400
@@ -98,7 +98,7 @@ def generate_book_poster(book, cover_img):
     # Step 3: Draw separator
     draw = ImageDraw.Draw(poster)
     separator_y = cover_y + cover_img.height + 40
-    draw.line([(40, separator_y), (poster_width - 40, separator_y)], fill="#cf857c", width=2)
+    draw.line([(40, separator_y), (poster_width - 40, separator_y)], fill="#e4e0d8", width=2)
 
     # Fonts
     title_font = ImageFont.truetype(TITLE_FONT, 30)
