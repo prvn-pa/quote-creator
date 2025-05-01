@@ -1,5 +1,5 @@
-Title: Asian-American veterans share stories 50 years after Vietnam war
-Subtitle: More Asian-American veterans are reflecting on the life-changing war that was at times made more complicated by their race.
-ImageURL: https://cdn.i-scmp.com/sites/default/files/styles/1020x680/public/d8/images/canvas/2025/04/29/1261ec26-ef76-4f4a-88ef-cbc3ad36eb68_fd7f7261.jpg?itok=9YbUPapw&v=1745905456
-Reference: South China Morning Post
-Link: https://www.scmp.com/news/world/united-states-canada/article/3308329/asian-american-veterans-share-their-stories-50-years-after-vietnam-war
+Title: Nickel production is notoriously dirty — here’s how to make it greener
+Subtitle: If scaled up, a method for extracting nickel without using carbon-rich coke could reduce emissions considerably. 
+ImageURL: https://media.nature.com/lw767/magazine-assets/d41586-025-01356-w/d41586-025-01356-w_50931430.jpg
+Reference: https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Nature_journal_logo.svg/1200px-Nature_journal_logo.svg.png
+Link: https://www.nature.com/articles/d41586-025-01356-w

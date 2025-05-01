@@ -10,12 +10,12 @@ SIDE_MARGIN = 20
 IMAGE_BOX_WIDTH = CANVAS_SIZE - 2 * SIDE_MARGIN  # almost full width
 IMAGE_BOX_HEIGHT = 420  # double height
 
-TITLE_FONT_SIZE = 42
-SUBTITLE_FONT_SIZE = 30
+TITLE_FONT_SIZE = 55
+SUBTITLE_FONT_SIZE = 34
 REFERENCE_FONT_SIZE = 20
 
-FONT_BOLD = ImageFont.truetype("fonts/Montserrat-Bold.ttf", TITLE_FONT_SIZE)
-FONT_ITALIC = ImageFont.truetype("fonts/sans-italic.ttf", SUBTITLE_FONT_SIZE)
+FONT_BOLD = ImageFont.truetype("fonts/NoticiaText-Bold.ttf", TITLE_FONT_SIZE)
+FONT_ITALIC = ImageFont.truetype("fonts/NoticiaText-Regular.ttf", SUBTITLE_FONT_SIZE)
 FONT_REF = ImageFont.truetype("fonts/Montserrat-Medium.ttf", REFERENCE_FONT_SIZE)
 
 def generate_qr_code(url, output_path):
@@ -129,15 +129,35 @@ def create_image_from_input(input_file):
     img.paste(cropped_img, (paste_x, paste_y))
     
     ref_y = paste_y + IMAGE_BOX_HEIGHT + 15
-    if reference:
-        w, h = draw.textbbox((0, 0), reference, font=FONT_REF)[2:]
-        ref_x = CANVAS_SIZE - PADDING - w
-        draw.text((ref_x, ref_y), reference, font=FONT_REF, fill="gray")
-        
-    # Generate and paste QR code image to the left side of the reference text   
+
+    # Generate and paste QR code image
     generate_qr_code(link, 'qrcode.png')    
     qrcode = Image.open("qrcode.png")
     img.paste(qrcode, (SIDE_MARGIN, ref_y))
+
+    # Download and resize logo to 100x100
+    try:
+        logo_response = requests.get(reference, timeout=10)
+        logo_response.raise_for_status()
+
+        content_type = logo_response.headers.get("Content-Type", "")
+        if not content_type.startswith("image/"):
+            raise ValueError(f"URL does not point to an image. Content-Type: {content_type}")
+
+        logo_img = Image.open(BytesIO(logo_response.content)).convert("RGBA")
+
+        # Resize proportionally: height = 100 px, width scaled accordingly
+        desired_height = 40
+        aspect_ratio = logo_img.width / logo_img.height
+        new_width = int(desired_height * aspect_ratio)
+        logo_img = logo_img.resize((new_width, desired_height), Image.Resampling.LANCZOS)
+
+    except Exception as e:
+        raise ValueError(f"Failed to download or open logo: {e}")
+
+    # Paste logo to the right side of QR code
+    logo_x = CANVAS_SIZE - SIDE_MARGIN - logo_img.width
+    img.paste(logo_img, (logo_x, ref_y), mask=logo_img if logo_img.mode == "RGBA" else None)
 
     output_path = "output_image.jpg"
     img.save(output_path)
