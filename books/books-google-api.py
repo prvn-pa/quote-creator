@@ -1,30 +1,24 @@
 import os
 import requests
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
+from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 
 # Paths to fonts on your system
 TITLE_FONT = "TiroTamil-Regular.ttf"
 TEXT_FONT = "NotoSansTamil-Regular.ttf"
 
-def read_book_data():
-    try:
-        with open("input.txt", "r", encoding="utf-8") as f:
-            lines = [line.strip() for line in f.readlines()]
-            if len(lines) < 6:
-                raise ValueError("File must have at least 6 lines.")
-            return {
-                "image_url": lines[0],
-                "title": lines[1],
-                "author": lines[2],
-                "genre": lines[3],
-                "year": lines[4],
-                "rating": float(lines[5])
-            }
-    except Exception as e:
-        print(f"Error reading book data: {e}")
-        return None
-        
+def search_books(query, max_results=5):
+    url = f"https://www.googleapis.com/books/v1/volumes?q={query}&maxResults={max_results}"
+    resp = requests.get(url)
+    return resp.json().get("items", [])
+
+def format_book_info(book):
+    info = book.get("volumeInfo", {})
+    title = info.get("title", "Unknown Title")
+    authors = ", ".join(info.get("authors", []))
+    year = info.get("publishedDate", "N/A")[:4]
+    return f"{title} by {authors} ({year})"
+
 def download_image(url):
     try:
         response = requests.get(url)
@@ -33,6 +27,23 @@ def download_image(url):
     except Exception:
         pass
     return None
+
+#def crop_center_square(image):
+    #width, height = image.size
+    #min_dim = min(width, height)
+   # left = (width - min_dim) // 2
+    #top = (height - min_dim) // 2
+   #f return image.crop((left, top, left + min_dim, top + min_dim))
+
+def get_user_rating():
+    while True:
+        try:
+            rating = float(input("Your rating (0 to 5, halves allowed): "))
+            if 0 <= rating <= 5:
+                return rating
+        except ValueError:
+            pass
+        print("Enter a number between 0 and 5.")
 
 def get_star_icons(rating, assets_path="assets"):
     full_stars = int(rating)
@@ -68,39 +79,21 @@ def draw_rating(poster_img, rating, assets_path="assets", spacing=10, y_offset=3
         x = x_start + i * (star_width + spacing)
         poster_img.paste(star, (x, y_start), star)
 
-def generate_book_poster(book_info, cover_img):
+def generate_book_poster(book, cover_img):
     poster_width, poster_height = 640, 960
     poster = Image.new("RGB", (poster_width, poster_height), color="#e4e0d8")
 
     # Step 1: Resize cover image to width = 400 while maintaining aspect ratio
-    desired_width = 380
+    desired_width = 400
     orig_w, orig_h = cover_img.size
     aspect_ratio = orig_h / orig_w
     desired_height = int(desired_width * aspect_ratio)
     cover_img = cover_img.resize((desired_width, desired_height), Image.Resampling.LANCZOS)
 
-        # Step 2: Center the resized cover image on the poster
+    # Step 2: Center the resized cover image on the poster
     cover_x = (poster_width - desired_width) // 2
     cover_y = 80
-
-    # Step 2.1: Create shadow
-    shadow_offset = 25
-    shadow = Image.new("RGBA", (desired_width + shadow_offset, desired_height + shadow_offset), (0, 0, 0, 0))
-    shadow_draw = ImageDraw.Draw(shadow)
-    shadow_draw.rectangle(
-        [shadow_offset, shadow_offset, desired_width + shadow_offset, desired_height + shadow_offset],
-        fill=(0, 0, 0, 70)  # semi-transparent shadow
-    )
-
-    # Blur the shadow slightly (optional, for soft shadow)
-    shadow = shadow.filter(ImageFilter.GaussianBlur(radius=6))
-
-    # Paste the shadow on the poster
-    poster.paste(shadow, (cover_x - shadow_offset // 2, cover_y - shadow_offset // 2), shadow)
-
-    # Paste the book cover on top of the shadow
     poster.paste(cover_img, (cover_x, cover_y))
-
 
     # Step 3: Draw separator
     draw = ImageDraw.Draw(poster)
@@ -113,10 +106,11 @@ def generate_book_poster(book_info, cover_img):
     small_font = ImageFont.truetype(TEXT_FONT, 18)
 
     # Metadata
-    title = book_info["title"]
-    authors = book_info["author"]
-    year = book_info["year"]
-    genre = book_info["genre"]
+    info = book.get("volumeInfo", {})
+    title = info.get("title", "Untitled")
+    authors = ", ".join(info.get("authors", []))
+    year = info.get("publishedDate", "")[:4]
+    genre = ", ".join(info.get("categories", []))
 
     text_y = separator_y + 20
     margin_x = 40
@@ -131,7 +125,7 @@ def generate_book_poster(book_info, cover_img):
         draw.text((margin_x, text_y), f"genre: {genre}", font=small_font, fill="black")
 
     # Rating
-    rating = book_info["rating"]
+    rating = get_user_rating()
     draw_rating(poster, rating, assets_path="assets")
 
     # Save
@@ -141,16 +135,41 @@ def generate_book_poster(book_info, cover_img):
     print(f"Book poster saved as {output_path}")
 
 def main():
-    book_info = read_book_data()
-    if not book_info:
+    query = input("Enter book title: ")
+    results = search_books(query)
+
+    if not results:
+        print("No books found.")
         return
 
-    cover_img = download_image(book_info["image_url"])
+    print("\nSelect the correct book:")
+    for idx, book in enumerate(results):
+        print(f"{idx + 1}: {format_book_info(book)}")
+
+    try:
+        choice = int(input("Enter choice number: ")) - 1
+        book = results[choice]
+    except Exception:
+        print("Invalid choice.")
+        return
+
+    info = book.get("volumeInfo", {})
+    image_links = info.get("imageLinks", {})
+    preferred_keys = ["extraLarge", "large", "medium", "small", "thumbnail", "smallThumbnail"]
+    image_url = next((image_links.get(k) for k in preferred_keys if image_links.get(k)), None)
+
+
+    if not image_url:
+        print("No cover image available.")
+        return
+
+    cover_img = download_image(image_url)
     if not cover_img:
-        print("Failed to download cover image.")
+        print("Failed to download cover.")
         return
 
-    generate_book_poster(book_info, cover_img)
+    #cover_img = crop_center_square(cover_img)
+    generate_book_poster(book, cover_img)
 
 if __name__ == "__main__":
     main()
