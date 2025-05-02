@@ -2,10 +2,11 @@ import os
 import requests
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from io import BytesIO
+import textwrap
 
 # Paths to fonts on your system
-TITLE_FONT = "TiroTamil-Regular.ttf"
-TEXT_FONT = "NotoSansTamil-Regular.ttf"
+TITLE_FONT = "TiltWarp-Regular.ttf"
+TEXT_FONT = "Poppins-Regular.ttf"
 
 def read_book_data():
     try:
@@ -121,14 +122,22 @@ def generate_book_poster(book_info, cover_img):
     text_y = separator_y + 20
     margin_x = 40
 
-    draw.text((margin_x, text_y), title.upper(), font=title_font, fill="black")
-    text_y += 40
+    max_width = poster_width - 2 * margin_x
+    wrapped_title = textwrap.wrap(title.upper(), width=30)  # Adjust width as needed
+
+    for line in wrapped_title:
+        bbox = title_font.getbbox(line)
+        line_width = bbox[2] - bbox[0]
+        line_height = bbox[3] - bbox[1]
+        draw.text((margin_x, text_y), line, font=title_font, fill="black")
+        text_y += line_height + 5  # Line spacing
+    text_y += 10
     draw.text((margin_x, text_y), f"by {authors}", font=sub_font, fill="black")
     text_y += 30
-    draw.text((margin_x, text_y), f"published: {year}", font=small_font, fill="black")
+    draw.text((margin_x, text_y), f"genre: {year}", font=small_font, fill="black")
     text_y += 25
     if genre:
-        draw.text((margin_x, text_y), f"genre: {genre}", font=small_font, fill="black")
+        draw.text((margin_x, text_y), f"completed on: {genre}", font=small_font, fill="black")
 
     # Rating
     rating = book_info["rating"]
