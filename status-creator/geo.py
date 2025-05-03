@@ -84,23 +84,26 @@ def detect_language(text):
 
 def parse_input(text):
     parts = text.strip().split('\n\n')
-    body = parts[0].replace('\n', ' ')
+    body = parts[0]
     author = parts[1] if len(parts) > 1 else ''
     return body, author
 
 def wrap_text(draw, text, font, max_width):
-    words = text.split()
     lines = []
-    line = ""
-    for word in words:
-        test_line = f"{line} {word}".strip()
-        if font.getlength(test_line) <= max_width:
-            line = test_line
-        else:
+    for paragraph in text.split('\n'):
+        words = paragraph.split()
+        line = ""
+        for word in words:
+            test_line = f"{line} {word}".strip()
+            if font.getlength(test_line) <= max_width:
+                line = test_line
+            else:
+                lines.append(line)
+                line = word
+        if line:
             lines.append(line)
-            line = word
-    if line:
-        lines.append(line)
+        if not words:  # Preserve empty lines
+            lines.append("")
     return lines
 
 def create_image(size, body, author, lang, outname):
