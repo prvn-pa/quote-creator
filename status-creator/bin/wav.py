@@ -4,13 +4,13 @@ from datetime import datetime
 from PIL import Image, ImageDraw
 
 # Canvas settings
-WIDTH, HEIGHT = 1000, 1000
+WIDTH, HEIGHT = 2560, 1440
 
 # Pastel colors
 PASTEL_COLORS = [
-    (255, 179, 186), (255, 223, 186), (255, 255, 186),
-    (186, 255, 201), (186, 225, 255), (221, 201, 255),
-    (200, 200, 255), (255, 200, 255), (200, 255, 240)
+    (62, 33, 97), (137, 79, 166), (203, 78, 145),
+    (245, 121, 148), (246, 132, 178), (244, 98, 108),
+    (182, 97, 184), (71, 88, 153), (110, 98, 157)
 ]
 
 def draw_wave(draw, y_offset, amplitude, frequency, phase, color, height, width):

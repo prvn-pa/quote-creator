@@ -3,13 +3,13 @@ from PIL import Image, ImageDraw
 from datetime import datetime
 
 # Canvas size (can be changed)
-WIDTH, HEIGHT = 1000, 1000
+WIDTH, HEIGHT = 2560, 1440
 
 # Soft pastel palette (RGB)
 PASTEL_COLORS = [
-    (255, 179, 186), (255, 223, 186), (255, 255, 186),
-    (186, 255, 201), (186, 225, 255), (221, 201, 255),
-    (200, 200, 255), (255, 200, 255), (200, 255, 240)
+    (62, 33, 97), (137, 79, 166), (203, 78, 145),
+    (245, 121, 148), (246, 132, 178), (244, 98, 108),
+    (182, 97, 184), (71, 88, 153), (110, 98, 157)
 ]
 
 SHAPES = ['circle', 'square', 'triangle']
@@ -46,8 +46,9 @@ def rotate_points(points, angle_deg, center):
         ry = cy + dx * math.sin(angle_rad) + dy * math.cos(angle_rad)
         rotated.append((rx, ry))
     return rotated
-
-def generate_geometric_art(width=1000, height=1000, max_shapes=5):
+    
+    
+def generate_geometric_art(width, height, max_shapes=5):
     bg_color = tuple(random.randint(240, 255) for _ in range(3)) + (255,)
     image = Image.new('RGBA', (width, height), color=bg_color)
     draw = ImageDraw.Draw(image, 'RGBA')
@@ -55,7 +56,10 @@ def generate_geometric_art(width=1000, height=1000, max_shapes=5):
     for _ in range(random.randint(3, max_shapes)):
         shape = random.choice(SHAPES)
         color = get_translucent_color()
-        size = random.randint(width // 3, int(width / 1.5))
+        
+        # Increase the size by 3 times
+        size = random.randint(width // 3, int(width / 1.5)) * 3  # Increased size
+
         x = random.randint(-size // 4, width - size // 2)
         y = random.randint(-size // 4, height - size // 2)
         draw_shape(draw, shape, x, y, size, color)
