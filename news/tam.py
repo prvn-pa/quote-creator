@@ -10,8 +10,8 @@ SIDE_MARGIN = 20
 IMAGE_BOX_WIDTH = CANVAS_SIZE - 2 * SIDE_MARGIN  # almost full width
 IMAGE_BOX_HEIGHT = 420  # double height
 
-TITLE_FONT_SIZE = 55
-SUBTITLE_FONT_SIZE = 34
+TITLE_FONT_SIZE = 45
+SUBTITLE_FONT_SIZE = 25
 REFERENCE_FONT_SIZE = 20
 
 FONT_BOLD = ImageFont.truetype("fonts/TiroTamil-Regular.ttf", TITLE_FONT_SIZE)
@@ -83,7 +83,7 @@ def create_image_from_input(input_file):
         elif line.startswith("Link:"):
             link = line[len("Link:"):].strip()
 
-    img = Image.new("RGB", (CANVAS_SIZE, CANVAS_SIZE), "white")
+    img = Image.new("RGB", (CANVAS_SIZE, CANVAS_SIZE), "#f2eee3")
     draw = ImageDraw.Draw(img)
 
     y = PADDING
