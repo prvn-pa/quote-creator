@@ -5,8 +5,11 @@ from io import BytesIO
 import textwrap
 
 # Paths to fonts on your system
-TITLE_FONT = "TiltWarp-Regular.ttf"
-TEXT_FONT = "Poppins-Regular.ttf"
+#TITLE_FONT = "TiltWarp-Regular.ttf"
+#TEXT_FONT = "Poppins-Regular.ttf"
+#Fonts for Tamil posters
+TITLE_FONT = "TiroTamil-Regular.ttf"
+TEXT_FONT = "NotoSansTamil-Regular.ttf"
 
 def read_book_data():
     try:
